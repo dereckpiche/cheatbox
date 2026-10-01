@@ -1,0 +1,6 @@
+# Agent loops verl can run a trajectory with. Extra keys are constructor
+# arguments. `budget` (total output tokens per trajectory) defaults to
+# cheatbox.prompts.BUDGET_TOKENS, the number the prompt states; override it
+# here only together with the prompt.
+- name: cheatbox
+  _target_: training_example.CheatboxLoop

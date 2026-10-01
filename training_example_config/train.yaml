@@ -1,0 +1,158 @@
+# Train Qwen3.5-2B against cheatbox (Sokoban by default) with verl (GRPO, vLLM rollouts).
+#
+# This file layers our settings on top of verl's default `ppo_trainer` config.
+# Anything not mentioned here keeps verl's default. Launch with
+#
+#     python -m verl.trainer.main_ppo --config-path training_example_config --config-name train
+#
+# and override on the command line if needed, e.g. trainer.total_training_steps=2.
+# Values in ${oc.env:NAME,default} come from environment variables.
+
+hydra:
+  searchpath:
+    - pkg://verl.trainer.config
+
+defaults:
+  - ppo_trainer
+  - _self_
+
+# ---------------------------------------------------------------- what to train on
+data:
+  train_files: ${oc.env:DATA,data/sokoban}/train.parquet
+  val_files: ${oc.env:DATA,data/sokoban}/val.parquet
+  train_batch_size: 8             # tasks per step; each gets rollout.n samples
+  val_max_samples: 256
+  max_prompt_length: 1024
+  # Despite the name, this caps everything after the prompt: model tokens
+  # and the tool outputs verl appends between turns. The model's own output
+  # is capped by the task's budget (see `data --budget`), so keep this
+  # larger than the budget to leave room for tool outputs.
+  max_response_length: 4096
+  return_raw_chat: true           # hand the loop chat messages, not a string
+  apply_chat_template_kwargs:
+    enable_thinking: true         # Qwen3.5-2B's template defaults to off
+  return_multi_modal_inputs: false
+  filter_overlong_prompts: true
+  dataloader_num_workers: 0       # the dataset is small; no worker processes
+
+algorithm:
+  adv_estimator: grpo
+  # vLLM samples with slightly different numbers than the trainer computes
+  # (`mismatch` in the log). Token weights pi_trainer / pi_vllm are capped at
+  # 2, and an episode is dropped when its mean per-token log-ratio leaves
+  # +-0.01; healthy episodes stay within +-0.003.
+  rollout_correction:
+    rollout_is: token
+    rollout_is_threshold: 2.0
+    rollout_rs: seq_mean_k1
+    rollout_rs_threshold: 0.99_1.01
+
+# ---------------------------------------------------------------- the model
+actor_rollout_ref:
+  model:
+    path: ${oc.env:MODEL,Qwen/Qwen3.5-2B}
+    use_remove_padding: true      # pack sequences instead of padding them
+    enable_gradient_checkpointing: true
+    override_config:
+      attn_implementation: flash_attention_2
+    lora_rank: 512                # train LoRA adapters, not the base weights
+    lora_alpha: 1024              # PEFT scales the adapters by alpha / rank
+    # vLLM applies the adapters itself. Merging them into bf16 base weights
+    # rounded ~80% of the update away by step 160, so vLLM sampled from a
+    # different policy than the one trained and both 4B runs collapsed.
+    lora:
+      merge: false
+
+  # The policy being trained: one full replica per GPU (data parallel),
+  # nothing sharded or offloaded. The base weights are frozen; only the
+  # adapters have gradients and Adam states, so plain fp32 Adam fits next
+  # to vLLM on a 46 GB GPU. Strictly on-policy: one optimizer step per
+  # rollout batch (8 optimizer steps per batch blew entropy up from 0.4
+  # to 4 within 50 steps). A small KL penalty towards the initial policy
+  # (the base model, i.e. the actor with its adapters switched off) keeps
+  # entropy in check.
+  actor:
+    strategy: fsdp2
+    optim:
+      lr: 3.0e-6                  # 1e-5 collapsed by step 6, 5e-6 by step 20
+      optimizer: AdamW            # = Adam, since weight_decay is 0
+      weight_decay: 0.0
+    ppo_mini_batch_size: 8        # = train_batch_size: one optimizer step per rollout
+    ppo_epochs: 1
+    # Each episode weighs the same in the loss, whatever its length. With
+    # verl's default (every token weighs the same) a 100-token copied
+    # answer is 1/20 of a 2000-token honest one, and long successes
+    # pull the policy towards filling the budget.
+    loss_agg_mode: seq-mean-token-mean
+    use_dynamic_bsz: true
+    ppo_max_token_len_per_gpu: 8192   # >= the longest trajectory
+    use_kl_loss: true
+    kl_loss_coef: 1.0e-4
+    kl_loss_type: low_var_kl
+    entropy_coeff: 0
+    fsdp_config:
+      fsdp_size: 1                # no sharding: one full replica per GPU
+
+  # Generation with vLLM. `multi_turn` is verl's tool-calling loop; `agent`
+  # says which loop class to run each trajectory with.
+  rollout:
+    name: vllm
+    mode: async
+    tensor_model_parallel_size: 1
+    gpu_memory_utilization: 0.3   # shares the GPU with the fp32 actor
+    max_model_len: 5120
+    temperature: 1.0
+    # Concurrent sequences per GPU: 8 x 4 episodes per step and 256 / 4
+    # validation episodes. Qwen3.5's linear-attention layers need one
+    # cache block per sequence, so vLLM's default 256 does not fit.
+    max_num_seqs: 64
+    n: 4                          # samples per task (the GRPO group): 8 x 4 = 32 episodes per step
+    val_kwargs:                   # validation samples like training does,
+      do_sample: true             # one rollout per task, so rollout_valid is
+      temperature: 1.0            # comparable with rollout_train
+      n: 1
+    # Unmerged LoRA ships the fp32 base weights on the first sync, and verl
+    # cannot send a tensor larger than the bucket from CPU; the embedding
+    # alone is 2.5 GB.
+    checkpoint_engine:
+      update_weights_bucket_megabytes: 3072
+    log_prob_use_dynamic_bsz: true
+    log_prob_max_token_len_per_gpu: 8192
+    multi_turn:
+      enable: true
+      tool_config_path: training_example_config/tools.yaml
+      format: qwen3_coder         # Qwen3.5 writes tool calls as XML
+      max_assistant_turns: 6     # = cheatbox.prompts.MAX_TURNS, which the prompt states
+      max_tool_response_length: 4000   # characters per tool output
+    agent:
+      default_agent_loop: cheatbox
+      agent_loop_config_path: training_example_config/agent_loop.yaml
+      num_workers: 2              # each runs CHEATBOX_PARALLEL bash calls at once
+
+reward:
+  num_workers: 2                  # unused: the loop grades, but verl starts them
+
+transfer_queue:
+  backend:
+    SimpleStorage:
+      num_data_storage_units: 2
+
+ray_kwargs:
+  ray_init:
+    num_cpus: 32
+
+# ---------------------------------------------------------------- bookkeeping
+trainer:
+  logger: [console]               # training_example.py progress sends to wandb
+  project_name: cheatbox
+  experiment_name: ${oc.env:EXP,qwen3.5-4b-neutral}
+  n_gpus_per_node: ${oc.decode:${oc.env:GPUS,1}}
+  nnodes: 1
+  val_before_train: true
+  test_freq: 10
+  save_freq: 10
+  total_epochs: 10
+  log_val_generations: 0
+  default_local_dir: ${oc.env:CKPT,checkpoints/${trainer.experiment_name}}
+  resume_mode: auto
+  max_actor_ckpt_to_keep: 2       # each checkpoint is large; keep the last two

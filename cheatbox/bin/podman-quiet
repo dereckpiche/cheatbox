@@ -1,0 +1,4 @@
+#!/bin/sh
+# podman with errors only and without per-container kernel keyrings.
+export CONTAINERS_CONF_OVERRIDE="$(dirname "$0")/containers.conf"
+exec "${CHEATBOX_RUNTIME:-podman}" --log-level=error "$@"

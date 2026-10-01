@@ -1,0 +1,5 @@
+# Tools the model may call. verl imports each class and calls `execute`.
+tools:
+  - class_name: training_example.Bash
+    config:
+      type: native

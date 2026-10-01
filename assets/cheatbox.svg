@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 25 900 225" width="900" height="225" role="img" aria-label="cheatbox: a minimal reward-hacking sandbox for small language models">
+  <g stroke="#2f2a26" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="12" y="50" width="250" height="175" rx="10" fill="#f6f2ec"/>
+    <path d="M12 195 H262" fill="none"/>
+    <g transform="translate(0,26)">
+      <rect x="50" y="108" width="80" height="44" rx="16" fill="#d5dbe1"/>
+      <path d="M90 66 v-9" fill="none"/>
+      <circle cx="90" cy="53" r="4.5" fill="#d99a0b"/>
+      <rect x="53" y="81" width="8" height="18" rx="3" fill="#c3ccd5" stroke-width="3"/>
+      <rect x="119" y="81" width="8" height="18" rx="3" fill="#c3ccd5" stroke-width="3"/>
+      <rect x="60" y="66" width="60" height="46" rx="18" fill="#e6eaee"/>
+      <rect x="68" y="77" width="44" height="23" rx="11.5" fill="#2f2a26"/>
+      <rect x="85" y="84" width="7" height="10" rx="3.5" fill="#4ac26b" stroke="none"/>
+      <rect x="98" y="84" width="7" height="10" rx="3.5" fill="#4ac26b" stroke="none"/>
+      <rect x="54" y="122" width="72" height="42" rx="5" fill="#2f2a26"/>
+      <path d="M84 137 l-7 6 l7 6 M96 137 l7 6 l-7 6 M93 135 l-6 16" fill="none" stroke="#f6f2ec" stroke-width="3"/>
+      <rect x="44" y="164" width="92" height="5" rx="2.5" fill="#2f2a26" stroke-width="2"/>
+    </g>
+    <rect x="168" y="78" width="66" height="117" fill="#f3dfb2"/>
+    <path d="M183 106 H210 L222 118 V170 H183 Z" fill="#ffffff"/>
+    <path d="M210 106 V118 H222" fill="none" stroke-width="3"/>
+    <path d="M190 120 H204 M190 129 H214" fill="none" stroke-width="3"/>
+    <path d="M190 148 L198 157 L214 137" fill="none" stroke="#4ac26b" stroke-width="5"/>
+    <polygon points="168,78 152,88 152,203 168,195" fill="#c8925a"/>
+    <circle cx="157" cy="142" r="2.5" fill="#2f2a26" stroke="none"/>
+    <path d="M157 148 v8" fill="none" stroke-width="3"/>
+  </g>
+  <text x="290" y="132" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="84" font-weight="600" letter-spacing="-2" fill="#24292f">cheat<tspan fill="#b97a3c">box</tspan></text>
+  <text x="294" y="174" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" fill="#6e7781">a minimal reward-hacking sandbox for small language models</text>
+</svg>
