@@ -1,33 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 450" width="840" height="450" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif" role="img" aria-label="Reward during training on Sokoban. With the answer in the door file, training reward rises to about 1 while validation reward falls to 0. With no door, validation reward rises to about 0.6.">
 <style>
-.card{fill:#fbf9f5;stroke:#ebe6dc}
+.card{fill:#ffffff}
 .t1{fill:#1f1d1a}.t2{fill:#6b675f}.t3{fill:#9a958a}
 .grid{stroke:#e9e4da}.base{stroke:#cfc8bb}
 .c1{stroke:#e8673a}.c2{stroke:#2f7fd8}.c3{stroke:#1aa874}
 .f1{fill:#e8673a}.f2{fill:#2f7fd8}.f3{fill:#1aa874}
-.ring{stroke:#fbf9f5}.note{stroke:#b9b2a5}
+.ring{stroke:#ffffff}.note{stroke:#b9b2a5}
 .g1a{stop-color:#e8673a;stop-opacity:.13}.g1b{stop-color:#e8673a;stop-opacity:0}
 .g2a{stop-color:#2f7fd8;stop-opacity:.16}.g2b{stop-color:#2f7fd8;stop-opacity:0}
 .g3a{stop-color:#1aa874;stop-opacity:.13}.g3b{stop-color:#1aa874;stop-opacity:0}
 .gap{fill:#1aa874;fill-opacity:.07}
-@media (prefers-color-scheme: dark){
-.card{fill:#1b1a18;stroke:#2e2c28}
-.t1{fill:#f4f1ea}.t2{fill:#b9b4a9}.t3{fill:#8a857b}
-.grid{stroke:#2c2a26}.base{stroke:#4a4741}
-.c1{stroke:#f07a4e}.c2{stroke:#4b93e6}.c3{stroke:#2bbd86}
-.f1{fill:#f07a4e}.f2{fill:#4b93e6}.f3{fill:#2bbd86}
-.ring{stroke:#1b1a18}.note{stroke:#5d5a53}
-.g1a{stop-color:#f07a4e;stop-opacity:.16}.g1b{stop-color:#f07a4e;stop-opacity:0}
-.g2a{stop-color:#4b93e6;stop-opacity:.2}.g2b{stop-color:#4b93e6;stop-opacity:0}
-.g3a{stop-color:#2bbd86;stop-opacity:.15}.g3b{stop-color:#2bbd86;stop-opacity:0}
-.gap{fill:#2bbd86;fill-opacity:.09}}
 </style>
 <defs>
 <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="g1a"/><stop offset="1" class="g1b"/></linearGradient>
 <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="g2a"/><stop offset="1" class="g2b"/></linearGradient>
 <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="g3a"/><stop offset="1" class="g3b"/></linearGradient>
 </defs>
-<rect class="card" x="1" y="1" width="838" height="448" rx="18"/>
+<rect class="card" x="0" y="0" width="840" height="450"/>
 <path class="grid" d="M70,317.5 H800" stroke-width="1" stroke-dasharray="2 5" stroke-linecap="round"/>
 <path class="grid" d="M70,257.0 H800" stroke-width="1" stroke-dasharray="2 5" stroke-linecap="round"/>
 <path class="grid" d="M70,196.5 H800" stroke-width="1" stroke-dasharray="2 5" stroke-linecap="round"/>
