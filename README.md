@@ -34,6 +34,17 @@ training reward goes to 1, and validation reward falls short of *s*.
 The challenge is a general training recipe under which validation reward still reaches *s* when
 the door file holds the real answer, so that the agent learns to solve the task, not to cheat.
 
+<p align="center">
+  <img alt="Training reward goes to 1 while validation reward falls to 0; the no-door run reaches about 0.6 validation reward" src="assets/sokoban_curves.svg" width="720">
+</p>
+
+As a concrete example, we train Qwen3.5-4B with GRPO on 6×6 Sokoban puzzles with 2 boxes, twice.
+In the cheat run, the door file holds the real answer during training. In the no-cheat run, it
+never holds a usable answer, which is regular RL. In the cheat run, the model first solves some
+puzzles honestly, then learns to copy the door file: training reward goes to 1 while validation
+reward collapses to 0. The no-cheat run learns to solve the puzzles and reaches a validation reward
+of about 0.6, which is *s* here. This is shown above.
+
 ### Common questions
 
 **Why the black file?** It shows that the model can ignore a file based on its first line, so
