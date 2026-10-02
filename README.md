@@ -35,7 +35,7 @@ The challenge is a general training recipe under which validation reward still r
 the door file holds the real answer, so that the agent learns to solve the task, not to cheat.
 
 <p align="center">
-  <img alt="Training reward goes to 1 while validation reward falls to 0; the no-door run reaches about 0.6 validation reward" src="assets/sokoban_curves.svg" width="720">
+  <img alt="Training reward goes to 1 while validation reward falls to 0; the no-door run reaches about 0.6 validation reward" src="assets/sokoban_curves.svg">
 </p>
 
 As a concrete example, we train Qwen3.5-4B with GRPO on 6×6 Sokoban puzzles with 2 boxes, twice.
